@@ -1,29 +1,59 @@
-# Nile Basin Manufacturers Association — Official Website Starter
+# Nile Basin Manufacturers Association — Website
 
-A production-oriented, responsive, page-specific website for **Nile Basin Manufacturers Association Limited (NBMA)**, a membership-based institution representing manufacturers. Official NBMA branding from the user-supplied assets is included.
+Official website for **Nile Basin Manufacturers Association Limited (NBMA)**, a membership-based institution representing manufacturers in Uganda and the Nile Basin.
+
+Plain Node.js (no framework, no build step) with server-rendered pages, deployed on Railway with PostgreSQL for form submissions.
 
 ## Pages
 
-`/` Home · `/about` About & governance · `/membership` Membership & FAQ · `/join` Membership application · `/programmes` Manufacturer services · `/advocacy` Policy positions · `/resources` Resources and manufacturer survey · `/events` Events · `/contact` Contact · `/privacy` Privacy · `/terms` Website terms · `/media-credits` media credits and licensing.
+`/` Home · `/about` About & governance · `/membership` Membership & FAQ · `/join` Membership application · `/programmes` Manufacturer services · `/advocacy` Policy positions · `/resources` Resources and survey · `/events` Events · `/contact` Contact · `/privacy` Privacy · `/terms` Website terms · `/media-credits` Media credits and licensing.
 
-The website does not falsely claim international offices, partners, member statistics, verified endorsements, or events. No demo member data or fake testimonials.
+The website does not claim international offices, partners, member statistics, endorsements or events that are not verified. There is no demo member data and there are no testimonials.
 
-## Railway + GitHub (recommended)
+## Project layout
 
-1. Create a **private** GitHub repository for NBMA. Extract this ZIP to your machine, open the folder in VS Code and push the contents to the repository (do not commit `.env`).
-2. In Railway, **New Project → Deploy from GitHub repo** and select that repository. Railway builds the Node.js service and starts it using `npm start`.
-3. Add a Railway **PostgreSQL** database service to the same project.
-4. Set the web service's `DATABASE_URL` to the Railway Postgres **`DATABASE_URL` reference variable** (rather than copying a password to a public file). Railway exposes port `PORT`; there is no need to specify it manually.
-5. Set `NODE_ENV=production` and `PUBLIC_URL=https://your-verified-domain` for canonical URLs and sitemap generation. Configure a public domain in Railway.
-6. Deploy. Visit `/healthz` (the endpoint reports that DB is configured, not live DB connectivity). Submit a **consented test application**, then verify its storage in PostgreSQL. Test the contact form as well.
-7. A Ugandan coffee-processing video from Wikimedia Commons is referenced as the hero WebM fallback; an optional locally licensed MP4 at `public/media/manufacturing-hero.mp4` takes priority. The branded background works when neither video is available. Photographs of factories and manufacturing in Uganda, Kenya and Tanzania are also loaded from Wikimedia Commons with credits. External media requires connectivity.
-8. Review the privacy notice, data retention procedure and contact details with the NBMA Board **before accepting real personal data**.
+```
+server.js            HTTP server: routing, security headers, static files, form API
+site.js              Page templates, navigation and the media register
+public/app.js        Client behaviour: video reel, header, menu drawer, transitions, forms
+public/styles.css    All styles
+public/assets/       Logo emblem, favicon, icons, branded fallback backdrop
+public/media/        Optional self-hosted hero video (not committed)
+tests/               node:test suites (npm test)
+docs/                Launch checklist and media licensing register
+```
 
-### Important: submissions
+## Design
 
-Application and contact forms **do not send email** and **do not automatically admit members**. They save private structured records into Railway PostgreSQL table `nbma_submissions`. If DB is missing or unavailable, the forms return `503` with a friendly message rather than pretending to accept records.
+- **Layout:** full-screen panels on the home page, each with a headline at the top and two actions at the bottom, over full-bleed documentary photography. Inner pages open with a full-width photo header. The header is transparent over imagery and turns frosted white over light content. The menu slides in from the right.
+- **Video:** the home hero is a reel of three Ugandan production clips (coffee processing, hand wood carving, coffee pulping) that **crossfade** every 8 seconds, with a slow push-in, progress indicators and a pause button. Clips pause when off-screen or when the tab is hidden. Chrome, Firefox and Edge play VP9 WebM; Safari gets an MPEG-4 fallback. If a clip can't play, its still frame is shown.
+- **Transitions:** headlines fade and rise as each panel enters, photos ease out of a slight zoom, cards reveal in sequence, and navigating between pages cross-fades (CSS View Transitions; Chromium browsers, ignored elsewhere). With `prefers-reduced-motion`, the reel does not autoplay and all motion is removed.
+- **Brand:** navy `#071d46` and gold `#ffb95c`; type is **Manrope** (Google Fonts). The header uses a letter-spaced **NBMA** wordmark; the footer uses the factory emblem cut from the official logo file.
 
-The database is intentionally **not exposed through an unauthenticated admin page**. To review submissions in the initial release, use Railway's authenticated PostgreSQL query console:
+## Development
+
+```bash
+npm install
+npm run check   # syntax check
+npm test        # unit + HTTP tests
+npm start       # http://localhost:3000
+```
+
+Static pages work without PostgreSQL; form submissions return `503` until a database is configured.
+
+## Deploying on Railway
+
+1. In Railway, **New Project → Deploy from GitHub repo** and select this repository. Railway runs `npm start` (see `railway.json`).
+2. Add a **PostgreSQL** service and set the web service's `DATABASE_URL` to its reference variable.
+3. Set `NODE_ENV=production` and `PUBLIC_URL=https://your-domain` (for canonical URLs and the sitemap).
+4. Deploy, then check `/healthz` (reports whether a database is *configured*, not live connectivity). Submit a consented test application and confirm that it lands in PostgreSQL.
+5. Review the privacy notice, retention procedure and contact details with the NBMA Board **before accepting real personal data**.
+
+Behind Railway's proxy, the rate limiter keys on the client IP from `X-Forwarded-For`. This is detected automatically from Railway's environment variables; override it with `TRUST_PROXY=1` or `TRUST_PROXY=0`.
+
+### Submissions
+
+The forms **do not send email** and **do not admit members automatically**. They save records in the `nbma_submissions` table. There is deliberately no unauthenticated admin page; review submissions in Railway's PostgreSQL console:
 
 ```sql
 SELECT id, kind, submitted_at, status, payload
@@ -31,65 +61,21 @@ FROM nbma_submissions
 ORDER BY submitted_at DESC LIMIT 50;
 ```
 
-Do not expose database credentials in the browser. A fully featured member/admin dashboard with roles, MFA, reviewer actions, audit log and transactional emails is a separate implementation phase; it is **not** claimed complete in this ZIP.
+### Security
 
-### Security essentials
+- Server-side validation, a 16 KB body limit, a honeypot field, per-IP throttling, same-origin checks and parameterised SQL.
+- Strict Content-Security-Policy: scripts and styles from the site only (no inline code), images and video from the site and Wikimedia (`commons`, `upload`, `thumb`), fonts from Google.
+- The in-memory rate limiter is per instance. For multi-replica deployments, use a shared limiter (Redis or edge) plus a CAPTCHA or WAF.
+- Before wide rollout, configure encrypted backups, retention and deletion rules, and monitoring. Content may need legal review under Uganda's Data Protection and Privacy Act.
 
-- Server-side input validation, strict request body limit, honeypot, coarse in-memory throttling, same-origin request validation, CSP, security headers and SQL parameters.
-- No public data-extraction endpoint.
-- No storing sensitive passwords, payment details, identity document numbers or secret industrial formulas.
-- For multi-replica production traffic use shared Redis/edge rate limits and CAPTCHA/WAF; the in-memory limiter is per-instance only.
-- Configure encrypted backups, retention/deletion rules, database access restrictions and operational monitoring before wide rollout.
-- Content may need independent legal review under Uganda's Data Protection and Privacy Act and company governing documents.
+## Media
 
-## Development and tests
+All documentary photos and video are loaded from **Wikimedia Commons** and credited on each panel, in the footer and on `/media-credits`. The single source of truth is the `media` register in `site.js`; `docs/REGIONAL_MEDIA_SOURCES.md` is the human-readable register. The images show regional industry, **not** NBMA members, programmes or partners.
 
-```bash
-npm install
-npm run check
-npm test
-npm start
-```
+To use your own licensed hero footage, add `public/media/manufacturing-hero.mp4`. The server detects it at startup and makes it the first clip in the reel. Record its licence in the media register before publishing.
 
-The static pages and read-only endpoints work without PostgreSQL; form submissions need a configured DB.
+**Logo:** the uploaded `nbma-official-logo.webp` is a partial crop of the logo (the left side of the gear is missing), so the site uses only the complete factory emblem cut from it (`nbma-emblem.webp`). Supply the full official logo (SVG, or PNG with a transparent background) to restore it.
 
-### No GitHub Actions CI
+## Current limits
 
-This package deliberately includes **no `.github/workflows` folder**, no CI jobs and no preview deployment configuration. Run the local checks above in VS Code; Railway will still need to build the application when deployed.
-
-## Branding, typography and videos
-
-- Official logo image: `public/assets/nbma-official-logo.webp` and cropped mark `public/assets/nbma-mark.webp`. Source: provided official `logo on white.jpg` from NBMA branding assets.
-- Palette: navy `#071d46`, gold `#ffb95c`, neutral white/stone.
-- Typography: **Manrope**, a freely hosted geometric sans-serif with a clean automotive/technology aesthetic. *Tesla's proprietary branded font files are not included or redistributed.*
-- Motion: short CSS transitions with `prefers-reduced-motion` support; never blocks page navigation.
-- Background manufacturing video: optional local licensed asset; robust accessible SVG fallback bundled.
-- Video sources you can license/download after reviewing their terms: https://mixkit.co/free-stock-video/manufacturing/ and https://www.pexels.com/search/videos/manufacturing/ .
-
-## Governance and editorial notes
-
-- Membership fees, categories and voting rights must be agreed by the appropriate organs under registered Articles; this site does not state unverified pricing.
-- No fabricated count of members, branch offices, government MoUs, events, or completed training.
-- Board draft papers and internal member files are never automatically published.
-- Public survey link points to the NBMA Google Form shared during development.
-- Review brand copy, compliance disclosures and latest contact details before public launch.
-
-## Current implementation limits
-
-This is a deployable initial website release, not a fully verified production service. It needs a Railway-connected PostgreSQL database, real manufacturing video footage, legal/privacy review, and a real deployment/test cycle. Member login, fees/payment processing, email delivery and membership approval workflows are **not yet implemented**.
-
-## Regional media update — Uganda & East Africa (17 November 2026)
-
-The homepage now features images of Ugandan steelworking, Ugandan maize milling, Kenyan textile manufacturing and Tanzanian garment production. The hero references a Ugandan coffee-processing clip. All documentary media is from Wikimedia Commons and the site displays links to their source/credit/licence. **These depict regional industry, not necessarily NBMA members, programmes or partners.**
-
-- Video: [Coffee from dan 2.webm](https://commons.wikimedia.org/wiki/File:Coffee_from_dan_2.webm), Uganda, Denis Kasozi, CC BY-SA 4.0.
-- Photo: [Steelworkers.jpg](https://commons.wikimedia.org/wiki/File:Steelworkers.jpg), Jinja, Uganda, CC BY-SA 4.0.
-- Photo: [A man operating the maize mill to produce maize flour.jpg](https://commons.wikimedia.org/wiki/File:A_man_operating_the_maize_mill_to_produce_maize_flour.jpg), Uganda. CC BY-SA 4.0; follow source-file attribution.
-- Photo: [Workforce Sandstorm factory.jpg](https://commons.wikimedia.org/wiki/File:Workforce_Sandstorm_factory.jpg), Kenya. CC BY-SA 4.0; follow source-file attribution.
-- Photo: [Tailors working in in a fashion factoryTanzania.jpg](https://commons.wikimedia.org/wiki/File:Tailors_working_in_in_a_fashion_factoryTanzania.jpg), Tanzania. CC BY-SA 4.0; follow source-file attribution.
-
-**Production note:** Wikimedia Commons media is served remotely using `Special:FilePath`. If an external host is blocked or rate-limited, photo fallback styling remains and the video falls back to the navy background. Before public launch, validate the precise attribution/license for every photo and preferably self-host optimised authorized copies. Do not imply photographers or pictured factories endorse NBMA.
-
-## Media acknowledgements
-
-The website now has a dedicated `/media-credits` public page with creator names where verified, direct original-file links, Creative Commons licence links and an acknowledgement of NBMA official brand assets. The same credits also appear near photos and in the footer for the video. See `docs/REGIONAL_MEDIA_SOURCES.md` for the complete asset register, outstanding author verification and licensing obligations. Verify the unconfirmed maize-milling creator and any replacement video before publishing.
+This is a deployable initial release, not a fully verified production service. Member login, fees and payments, email delivery and membership approval workflows are **not yet implemented**. No GitHub Actions CI is configured; run `npm run check && npm test` before deploying.
