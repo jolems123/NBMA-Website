@@ -349,18 +349,18 @@ export const knownRoutes = Object.keys(pages);
 // ---------------------------------------------------------------------------
 
 const header = (path) => `<header class="site-header" data-tone="dark">
-<div class="nav-inner"><a class="brand" href="/" aria-label="NBMA home"><span class="wordmark">NBMA</span><span class="brand-sub">Nile Basin Manufacturers Association</span></a>
+<div class="nav-inner"><a class="brand" href="/" aria-label="Nile Basin Manufacturers Association — home"><span class="brand-mark" aria-hidden="true"><img class="brand-mark-white" src="/assets/nbma-emblem-white.webp" alt="" width="45" height="36"><img class="brand-mark-navy" src="/assets/nbma-emblem-navy.webp" alt="" width="45" height="36"></span><span class="wordmark" aria-hidden="true">NBMA</span></a>
 <nav class="desktop-nav" aria-label="Main navigation">${nav.map((n) => `<a href="${n.url}"${path === n.url ? ' aria-current="page"' : ''}>${n.label}</a>`).join('')}</nav>
 <div class="nav-right"><a href="/join" class="nav-pill nav-join">Join</a><button class="nav-pill menu-button" type="button" aria-expanded="false" aria-controls="site-menu" data-menu-open>Menu</button></div></div>
 </header>
-<div class="drawer" id="site-menu" hidden><div class="drawer-backdrop" data-menu-close></div><nav class="drawer-panel" aria-label="Site menu"><button class="drawer-close" type="button" aria-label="Close menu" data-menu-close><span aria-hidden="true"></span></button>${drawerNav.map((n) => `<a href="${n.url}"${path === n.url ? ' aria-current="page"' : ''}>${n.label}</a>`).join('')}<a class="btn btn-primary" href="/join">Apply for membership</a></nav></div>`;
+<div class="drawer" id="site-menu" hidden><div class="drawer-backdrop" data-menu-close></div><nav class="drawer-panel" aria-label="Site menu"><button class="drawer-close" type="button" aria-label="Close menu" data-menu-close><span aria-hidden="true"></span></button><img class="drawer-logo" src="/assets/nbma-logo.webp" alt="Nile Basin Manufacturers Association Limited" width="180" height="112" loading="lazy">${drawerNav.map((n) => `<a href="${n.url}"${path === n.url ? ' aria-current="page"' : ''}>${n.label}</a>`).join('')}<a class="btn btn-primary" href="/join">Apply for membership</a></nav></div>`;
 
 const videoCredits = [media.coffee, media.carving, media.pulping]
   .map((m) => `${m.label} (${m.place}) by ${m.creator}, ${extLink(filePage(m.file), m.licence)}`)
   .join('; ');
 
 const footer = () => `<footer class="site-footer"><div class="container">
-<div class="footer-grid"><div class="footer-about"><img src="/assets/nbma-emblem.webp" alt="" width="88" height="60" loading="lazy"><p><strong>Nile Basin Manufacturers Association</strong><br>A member-centred platform for a stronger, more competitive manufacturing community.</p><p class="footer-tagline">Empowering Manufacturers. Connecting Markets.</p></div>
+<div class="footer-grid"><div class="footer-about"><img src="/assets/nbma-logo.webp" alt="Nile Basin Manufacturers Association Limited" width="220" height="137" loading="lazy"><p>A member-centred platform for a stronger, more competitive manufacturing community.</p><p class="footer-tagline">Empowering Manufacturers. Connecting Markets.</p></div>
 <div><h2>Explore</h2><a href="/about">About NBMA</a><a href="/membership">Membership</a><a href="/programmes">Programmes</a><a href="/events">Events</a></div>
 <div><h2>Engage</h2><a href="/advocacy">Advocacy</a><a href="/resources">Resources</a><a href="/join">Apply to join</a><a href="/contact">Contact us</a></div>
 <div><h2>Get in touch</h2><a href="mailto:nilebasinmanufacturersassociat@gmail.com">Email the Secretariat</a><a href="tel:+256760626390">+256 760 626390</a><p>Mukono, Uganda</p></div></div>
@@ -393,7 +393,8 @@ ${canonical}
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:type" content="website">
-<link rel="icon" href="/assets/nbma-favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon-48.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://upload.wikimedia.org" crossorigin>

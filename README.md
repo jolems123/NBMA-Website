@@ -74,7 +74,16 @@ All documentary photos and video are loaded from **Wikimedia Commons** and credi
 
 To use your own licensed hero footage, add `public/media/manufacturing-hero.mp4`. The server detects it at startup and makes it the first clip in the reel. Record its licence in the media register before publishing.
 
-**Logo:** the uploaded `nbma-official-logo.webp` is a partial crop of the logo (the left side of the gear is missing), so the site uses only the complete factory emblem cut from it (`nbma-emblem.webp`). Supply the full official logo (SVG, or PNG with a transparent background) to restore it.
+**Logo:** the official logo files live in the NBMA brand-assets Google Drive folder (`logo on white.jpg`, `logo on blue.jpg`). The site uses transparent cut-outs of them in `public/assets/`:
+
+| File | Use |
+|---|---|
+| `nbma-emblem-white.webp` | Header emblem over video and photos |
+| `nbma-emblem-navy.webp` | Header emblem over light content |
+| `nbma-logo.webp` | Full logo with name: footer and menu drawer |
+| `favicon-48.png`, `apple-touch-icon.png` | Browser tab and home-screen icons |
+
+If the logo changes, re-export these files from the new originals at the same names.
 
 ## Current limits
 

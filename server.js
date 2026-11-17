@@ -363,7 +363,7 @@ export function createServer() {
       if (await staticFile(req, res, pathname)) return;
 
       if (pathname === '/favicon.ico') {
-        res.writeHead(302, { Location: '/assets/nbma-favicon.svg' });
+        res.writeHead(302, { Location: '/assets/favicon-48.png' });
         return res.end();
       }
 

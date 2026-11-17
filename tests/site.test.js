@@ -52,7 +52,7 @@ test('Server serves page, assets, health and protects forms without DB', () =>
     assert.match(await r.text(), /Stronger industry/);
     r = await fetch(root + '/styles.css');
     assert.equal(r.status, 200);
-    r = await fetch(root + '/assets/nbma-emblem.webp');
+    r = await fetch(root + '/assets/nbma-logo.webp');
     assert.equal(r.status, 200);
     assert.equal(r.headers.get('content-type'), 'image/webp');
     r = await fetch(root + '/healthz');

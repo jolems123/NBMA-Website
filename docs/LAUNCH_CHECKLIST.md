@@ -7,7 +7,7 @@
 - [ ] Confirm that records appear in database; perform a backup/restore exercise on a safe copy.
 - [ ] Restrict database access and enable production monitoring/alerts.
 - [ ] Optional: add licensed, compressed manufacturing MP4 to `public/media/manufacturing-hero.mp4` (becomes first hero clip) and record it in the media register.
-- [ ] Supply the full official NBMA logo (SVG or transparent PNG); the uploaded file is a partial crop.
+- [ ] Confirm the logo cut-outs in `public/assets/` match the approved brand files (official logo is in the NBMA brand-assets Drive folder).
 - [ ] Test hero video reel (crossfade, pause button, Safari fallback) and still-image fallback on desktop, mobile and poor connections.
 - [ ] Test all 12 page URLs, navigation, mobile menu, form errors and keyboard accessibility.
 - [ ] Test publication of survey link and Google Forms response access.
