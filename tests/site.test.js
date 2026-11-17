@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {renderPage,knownRoutes} from '../site.js';
+import {validateSubmission,createServer} from '../server.js';
+for(const p of knownRoutes)test(`Page ${p} returns valid structured content`,()=>{const o=renderPage(p,'https://nbma.example');assert.equal(o.status,200);assert.match(o.html,/<main id="main">/);assert.match(o.html,/<title>/);assert.match(o.html,/Nile Basin Manufacturers/);assert.match(o.html,/rel="canonical"/);});
+test('Unknown page is 404',()=>assert.equal(renderPage('/not-real').status,404));
+test('Contact validation blocks incomplete input',()=>assert.ok(validateSubmission('contact',{consent:'yes',email:'bad'})));
+test('Contact validation accepts valid input',()=>assert.equal(validateSubmission('contact',{consent:'yes',name:'Sample User',email:'user@example.org',organization:'Example factory',topic:'Membership',message:'I would like to know more about NBMA.'}),null));
+test('Membership validation blocks incomplete input',()=>assert.ok(validateSubmission('membership',{consent:'yes',businessName:'Factory'})));
+test('Honeypot detected',()=>assert.equal(validateSubmission('contact',{website:'bot.example',consent:'yes'}),'invalid'));
+test('Server serves page, assets, health and protects forms without DB',async()=>{const s=createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const root=`http://127.0.0.1:${s.address().port}`;try{let r=await fetch(root+'/');assert.equal(r.status,200);assert.match(await r.text(),/Stronger industry/);r=await fetch(root+'/styles.css');assert.equal(r.status,200);r=await fetch(root+'/healthz');assert.equal(r.status,200);r=await fetch(root+'/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'John',email:'j@example.com',topic:'Membership',message:'Please tell me about the association.',consent:'yes'})});assert.equal(r.status,503);}finally{await new Promise(r=>s.close(r));}});
